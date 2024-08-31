@@ -1012,7 +1012,7 @@ where
         self.wrapper
             .lock()
             .expect(WRAPPER_POISONED_MUTEX)
-            .fundamental_data(req_id, timestamp.as_ref());
+            .head_timestamp(req_id, timestamp.as_ref());
         Ok(())
     }
 
@@ -2191,62 +2191,62 @@ where
             0 => return Ok(()), // None
             1..=2 =>
             // Last (1) or AllLast (2)
-            {
-                let price = decode_f64(&mut fields_itr)?;
-                let size = decode_i32(&mut fields_itr)?;
-                let mask = decode_i32(&mut fields_itr)?;
-                let mut tick_attrib_last = TickAttribLast::default();
-                tick_attrib_last.past_limit = mask & 1 != 0;
-                tick_attrib_last.unreported = mask & 2 != 0;
-                let exchange = decode_string(&mut fields_itr)?;
-                let special_conditions = decode_string(&mut fields_itr)?;
-                self.wrapper
-                    .lock()
-                    .expect(WRAPPER_POISONED_MUTEX)
-                    .tick_by_tick_all_last(
-                        req_id,
-                        FromPrimitive::from_i32(tick_type).unwrap(),
-                        time,
-                        price,
-                        size,
-                        tick_attrib_last,
-                        exchange.as_ref(),
-                        special_conditions.as_ref(),
-                    );
-            }
+                {
+                    let price = decode_f64(&mut fields_itr)?;
+                    let size = decode_i32(&mut fields_itr)?;
+                    let mask = decode_i32(&mut fields_itr)?;
+                    let mut tick_attrib_last = TickAttribLast::default();
+                    tick_attrib_last.past_limit = mask & 1 != 0;
+                    tick_attrib_last.unreported = mask & 2 != 0;
+                    let exchange = decode_string(&mut fields_itr)?;
+                    let special_conditions = decode_string(&mut fields_itr)?;
+                    self.wrapper
+                        .lock()
+                        .expect(WRAPPER_POISONED_MUTEX)
+                        .tick_by_tick_all_last(
+                            req_id,
+                            FromPrimitive::from_i32(tick_type).unwrap(),
+                            time,
+                            price,
+                            size,
+                            tick_attrib_last,
+                            exchange.as_ref(),
+                            special_conditions.as_ref(),
+                        );
+                }
             3 =>
             // BidAsk
-            {
-                let bid_price = decode_f64(&mut fields_itr)?;
-                let ask_price = decode_f64(&mut fields_itr)?;
-                let bid_size = decode_i32(&mut fields_itr)?;
-                let ask_size = decode_i32(&mut fields_itr)?;
-                let mask = decode_i32(&mut fields_itr)?;
-                let mut tick_attrib_bid_ask = TickAttribBidAsk::default();
-                tick_attrib_bid_ask.bid_past_low = mask & 1 != 0;
-                tick_attrib_bid_ask.ask_past_high = mask & 2 != 0;
-                self.wrapper
-                    .lock()
-                    .expect(WRAPPER_POISONED_MUTEX)
-                    .tick_by_tick_bid_ask(
-                        req_id,
-                        time,
-                        bid_price,
-                        ask_price,
-                        bid_size,
-                        ask_size,
-                        tick_attrib_bid_ask,
-                    );
-            }
+                {
+                    let bid_price = decode_f64(&mut fields_itr)?;
+                    let ask_price = decode_f64(&mut fields_itr)?;
+                    let bid_size = decode_i32(&mut fields_itr)?;
+                    let ask_size = decode_i32(&mut fields_itr)?;
+                    let mask = decode_i32(&mut fields_itr)?;
+                    let mut tick_attrib_bid_ask = TickAttribBidAsk::default();
+                    tick_attrib_bid_ask.bid_past_low = mask & 1 != 0;
+                    tick_attrib_bid_ask.ask_past_high = mask & 2 != 0;
+                    self.wrapper
+                        .lock()
+                        .expect(WRAPPER_POISONED_MUTEX)
+                        .tick_by_tick_bid_ask(
+                            req_id,
+                            time,
+                            bid_price,
+                            ask_price,
+                            bid_size,
+                            ask_size,
+                            tick_attrib_bid_ask,
+                        );
+                }
             4 =>
             // MidPoint
-            {
-                let mid_point = decode_f64(&mut fields_itr)?;
-                self.wrapper
-                    .lock()
-                    .expect(WRAPPER_POISONED_MUTEX)
-                    .tick_by_tick_mid_point(req_id, time, mid_point);
-            }
+                {
+                    let mid_point = decode_f64(&mut fields_itr)?;
+                    self.wrapper
+                        .lock()
+                        .expect(WRAPPER_POISONED_MUTEX)
+                        .tick_by_tick_mid_point(req_id, time, mid_point);
+                }
             _ => return Ok(()),
         }
         Ok(())
